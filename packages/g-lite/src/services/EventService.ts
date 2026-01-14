@@ -94,11 +94,35 @@ export class EventService {
     const bbox = this.context.contextService.getBoundingClientRect();
     let scaleX = 1;
     let scaleY = 1;
-    const $el =
-      this.context.contextService.getDomElement() as HTMLCanvasElement;
-    if ($el && bbox) {
-      const { offsetWidth, offsetHeight } = $el;
-      if (offsetWidth && offsetHeight) {
+    const $el = this.context.contextService.getDomElement() as
+      | HTMLCanvasElement
+      | SVGElement;
+    const elementForScale =
+      $el?.parentElement instanceof SVGElement ? $el.parentElement : $el;
+    if (elementForScale && bbox) {
+      let offsetWidth: number;
+      let offsetHeight: number;
+      if (elementForScale instanceof SVGElement) {
+        offsetWidth = this.getSVGSize(
+          elementForScale,
+          'width',
+          elementForScale.clientWidth,
+        );
+        offsetHeight = this.getSVGSize(
+          elementForScale,
+          'height',
+          elementForScale.clientHeight,
+        );
+      } else {
+        offsetWidth = elementForScale.offsetWidth;
+        offsetHeight = elementForScale.offsetHeight;
+      }
+      if (
+        offsetWidth !== undefined &&
+        offsetWidth !== 0 &&
+        offsetHeight !== undefined &&
+        offsetHeight !== 0
+      ) {
         scaleX = bbox.width / offsetWidth;
         scaleY = bbox.height / offsetHeight;
       }
@@ -108,6 +132,27 @@ export class EventService {
       scaleY,
       bbox,
     };
+  }
+
+  private getSVGSize(
+    element: SVGElement,
+    attribute: 'width' | 'height',
+    clientSize: number,
+  ) {
+    const attr = element.getAttribute(attribute);
+    const parsed = attr !== null && attr !== '' ? Number(attr) : undefined;
+    if (parsed !== undefined && !Number.isNaN(parsed)) {
+      return parsed;
+    }
+    if (element instanceof SVGSVGElement) {
+      if (attribute === 'width' && element.width?.baseVal) {
+        return element.width.baseVal.value;
+      }
+      if (attribute === 'height' && element.height?.baseVal) {
+        return element.height.baseVal.value;
+      }
+    }
+    return clientSize;
   }
 
   /**
