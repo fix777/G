@@ -98,20 +98,16 @@ export class EventService {
     const elementForScale =
       $el instanceof SVGElement && $el.parentElement ? $el.parentElement : $el;
     const bbox =
-      elementForScale?.getBoundingClientRect?.() ||
-      this.context.contextService.getBoundingClientRect();
+      $el instanceof SVGElement && $el.parentElement?.getBoundingClientRect
+        ? $el.parentElement.getBoundingClientRect()
+        : this.context.contextService.getBoundingClientRect();
     let scaleX = 1;
     let scaleY = 1;
 
     if (elementForScale && bbox) {
       const offsetWidth = (elementForScale as HTMLElement).offsetWidth;
       const offsetHeight = (elementForScale as HTMLElement).offsetHeight;
-      if (
-        offsetWidth !== undefined &&
-        offsetWidth !== 0 &&
-        offsetHeight !== undefined &&
-        offsetHeight !== 0
-      ) {
+      if (offsetWidth && offsetHeight) {
         scaleX = bbox.width / offsetWidth;
         scaleY = bbox.height / offsetHeight;
       }
