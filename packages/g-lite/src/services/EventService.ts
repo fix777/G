@@ -98,7 +98,8 @@ export class EventService {
     const isSvg = $el instanceof SVGElement;
     const $parentEl = $el?.parentElement;
     const elementForScale = isSvg && $parentEl ? $parentEl : $el;
-    const bbox = isSvg && $parentEl?.getBoundingClientRect
+    const bbox =
+      isSvg && $parentEl?.getBoundingClientRect
         ? $parentEl.getBoundingClientRect()
         : this.context.contextService.getBoundingClientRect();
     let scaleX = 1;
