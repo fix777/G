@@ -91,32 +91,21 @@ export class EventService {
   }
 
   private getScale() {
-    const bbox = this.context.contextService.getBoundingClientRect();
-    let scaleX = 1;
-    let scaleY = 1;
     const $el = this.context.contextService.getDomElement() as
       | HTMLCanvasElement
-      | SVGElement;
+      | SVGElement
+      | null;
     const elementForScale =
-      $el?.parentElement instanceof SVGElement ? $el.parentElement : $el;
+      $el instanceof SVGElement && $el.parentElement ? $el.parentElement : $el;
+    const bbox =
+      elementForScale?.getBoundingClientRect?.() ||
+      this.context.contextService.getBoundingClientRect();
+    let scaleX = 1;
+    let scaleY = 1;
+
     if (elementForScale && bbox) {
-      let offsetWidth: number;
-      let offsetHeight: number;
-      if (elementForScale instanceof SVGElement) {
-        offsetWidth = this.getSVGSize(
-          elementForScale,
-          'width',
-          elementForScale.clientWidth,
-        );
-        offsetHeight = this.getSVGSize(
-          elementForScale,
-          'height',
-          elementForScale.clientHeight,
-        );
-      } else {
-        offsetWidth = elementForScale.offsetWidth;
-        offsetHeight = elementForScale.offsetHeight;
-      }
+      const offsetWidth = (elementForScale as HTMLElement).offsetWidth;
+      const offsetHeight = (elementForScale as HTMLElement).offsetHeight;
       if (
         offsetWidth !== undefined &&
         offsetWidth !== 0 &&
@@ -132,27 +121,6 @@ export class EventService {
       scaleY,
       bbox,
     };
-  }
-
-  private getSVGSize(
-    element: SVGElement,
-    attribute: 'width' | 'height',
-    clientSize: number,
-  ) {
-    const attr = element.getAttribute(attribute);
-    const parsed = attr !== null && attr !== '' ? Number(attr) : undefined;
-    if (parsed !== undefined && !Number.isNaN(parsed)) {
-      return parsed;
-    }
-    if (element instanceof SVGSVGElement) {
-      if (attribute === 'width' && element.width?.baseVal) {
-        return element.width.baseVal.value;
-      }
-      if (attribute === 'height' && element.height?.baseVal) {
-        return element.height.baseVal.value;
-      }
-    }
-    return clientSize;
   }
 
   /**
