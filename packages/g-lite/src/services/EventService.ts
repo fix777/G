@@ -95,11 +95,11 @@ export class EventService {
       | HTMLCanvasElement
       | SVGElement
       | null;
-    const elementForScale =
-      $el instanceof SVGElement && $el.parentElement ? $el.parentElement : $el;
-    const bbox =
-      $el instanceof SVGElement && $el.parentElement?.getBoundingClientRect
-        ? $el.parentElement.getBoundingClientRect()
+    const isSvg = $el instanceof SVGElement;
+    const $parentEl = $el?.parentElement;
+    const elementForScale = isSvg && $parentEl ? $parentEl : $el;
+    const bbox = isSvg && $parentEl?.getBoundingClientRect
+        ? $parentEl.getBoundingClientRect()
         : this.context.contextService.getBoundingClientRect();
     let scaleX = 1;
     let scaleY = 1;
