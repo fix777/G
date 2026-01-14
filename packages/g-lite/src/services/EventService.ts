@@ -91,13 +91,23 @@ export class EventService {
   }
 
   private getScale() {
-    const bbox = this.context.contextService.getBoundingClientRect();
+    const $el = this.context.contextService.getDomElement() as
+      | HTMLCanvasElement
+      | SVGElement
+      | null;
+    const isSvg = $el instanceof SVGElement;
+    const $parentEl = $el?.parentElement;
+    const elementForScale = isSvg && $parentEl ? $parentEl : $el;
+    const bbox =
+      isSvg && $parentEl?.getBoundingClientRect
+        ? $parentEl.getBoundingClientRect()
+        : this.context.contextService.getBoundingClientRect();
     let scaleX = 1;
     let scaleY = 1;
-    const $el =
-      this.context.contextService.getDomElement() as HTMLCanvasElement;
-    if ($el && bbox) {
-      const { offsetWidth, offsetHeight } = $el;
+
+    if (elementForScale && bbox) {
+      const offsetWidth = (elementForScale as HTMLElement).offsetWidth;
+      const offsetHeight = (elementForScale as HTMLElement).offsetHeight;
       if (offsetWidth && offsetHeight) {
         scaleX = bbox.width / offsetWidth;
         scaleY = bbox.height / offsetHeight;
